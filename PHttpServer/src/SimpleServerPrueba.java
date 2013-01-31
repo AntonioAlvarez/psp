@@ -24,8 +24,11 @@ import java.util.Scanner;
 
 public class SimpleServerPrueba {
 	
+	/*public static void Process(Socket socket){
+		
+	}*/
 	
-public static void monoHilo() throws IOException{
+	public static void monoHilo() throws IOException{
 		
 		final String newLine = "\r\n";
 		int port = 8080;

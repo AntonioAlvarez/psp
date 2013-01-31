@@ -15,7 +15,17 @@ import java.util.Scanner;
 */
 public class HttpServer {
 	
-
+	
+	public static void main(String [] args) throws IOException, InterruptedException{
+		final int port = 8080;
+		ServerSocket serverSocket = new ServerSocket(port);
+		while(true)
+		{
+			Socket socket = serverSocket.accept();
+			SimpleServer.Process(socket);
+		}
+		
+	}
 	
 
 }

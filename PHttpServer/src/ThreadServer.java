@@ -10,16 +10,21 @@ import java.util.Scanner;
 
 public class ThreadServer extends Thread {
 
-public static void multiHilo() throws IOException{
+	final static  String newLine = "\r\n";
+	final static int  port = 8080;
+	final static String fileNameError404 = "fileError404.html";
+	final static String response200 = "HTTP/1.0 200 OK";
+	final static  String response404 = "HTTP/1.0 404 Not Found";
+	
+	
+
+	
+	public static void multiHilo() throws IOException{
 		
-		final String newLine = "\r\n";
-		int port = 8080;
-		final String fileNameError404 = "fileError404.html";
-		final String response200 = "HTTP/1.0 200 OK";
-		final String response404 = "HTTP/1.0 404 Not Found";
-		ServerSocket serverSocket = new ServerSocket(port);
+		
 		
 		while(true){
+			ServerSocket serverSocket = new ServerSocket(port);
 			Socket socket = serverSocket.accept();
 			
 			Scanner scanner = new Scanner (socket.getInputStream());

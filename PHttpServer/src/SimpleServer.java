@@ -12,11 +12,23 @@ import java.util.Scanner;
 
 public class SimpleServer {
 
-	private static ServerSocket serversocket;
-	private static Socket socket;
+	/*private static ServerSocket serversocket;
+	private static Socket socket;*/
 	private static final String newLine = "\r\n";
 	
-	public static void main(String[] args) throws IOException{
+
+public static void Process(Socket socket) throws IOException, InterruptedException{
+	
+	String fileName = getFileName(socket.getInputStream());
+	
+	writeHeader(socket.getOutputStream(), fileName);
+	
+	writeFile(socket.getOutputStream(), fileName);
+
+	socket.close();
+	}
+
+	/*public static void main(String[] args) throws IOException{
 		
 		final int port = 8080;
 		ServerSocket serverSocket = new ServerSocket(port);
@@ -24,14 +36,7 @@ public class SimpleServer {
 		
 		while(true) {
 		Socket socket = serverSocket.accept();
-		
-		String fileName = getFileName(socket.getInputStream());
-		
-		writeHeader(socket.getOutputStream(), fileName);
-		
-		writeFile(socket.getOutputStream(), fileName);
 	
-		socket.close();
 		//serverSocket.close();
 
 		//PrintWriter printWriter = new PrintWriter (socket.getOutputStream(),true);
@@ -41,7 +46,7 @@ public class SimpleServer {
 		//printWriter.close();
 	
 	}
-	}
+	}*/
 
 	
 private static String getFileName(InputStream inputStream){
@@ -81,7 +86,7 @@ private static void writeHeader(OutputStream outputStream, String fileName) thro
 
 }
 
-private static void writeFile(OutputStream outputStream, String fileName) throws IOException {
+private static void writeFile(OutputStream outputStream, String fileName) throws IOException, InterruptedException {
 	
 	final String fileNameError404 = "fileError404.html";
 	
@@ -97,9 +102,12 @@ private static void writeFile(OutputStream outputStream, String fileName) throws
 	
 	int count;
 	//pausa
-	while ((count = fileInputStream.read(buffer)) != -1)
+	while ((count = fileInputStream.read(buffer)) != -1){
+		System.out.println(Thread.currentThread().getName() + ".");
+		Thread.sleep(100);
 		outputStream.write(buffer, 0, count);
 	
+	}
 	fileInputStream.close();
 	
 	
