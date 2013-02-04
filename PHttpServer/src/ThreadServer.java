@@ -1,80 +1,125 @@
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
 
 
-public class ThreadServer extends Thread {
-
-	final static  String newLine = "\r\n";
-	final static int  port = 8080;
-	final static String fileNameError404 = "fileError404.html";
-	final static String response200 = "HTTP/1.0 200 OK";
-	final static  String response404 = "HTTP/1.0 404 Not Found";
-	
+/*hacerlo con metodos estaticos */
+public class ThreadServer implements Runnable {
 	
 
+	private  final String newLine = "\r\n";
+	private  String defaultFileName = "index.html";
+	private String response200 = "HTTP/1.0 200 OK";
+	private String response404 = "HTTP/1.0 404 NOT FOUND";
+	private String fileNameError404 = "fileError404.html";
 	
-	public static void multiHilo() throws IOException{
-		
-		
-		
-		while(true){
-			ServerSocket serverSocket = new ServerSocket(port);
-			Socket socket = serverSocket.accept();
-			
-			Scanner scanner = new Scanner (socket.getInputStream());
-			String fileName="index.html";
-			
-			while (true/*scanner.hasNextLine()*/)
-			{
-				String line = scanner.nextLine();//devuelve la linea
-				//if(line.startsWith("GET"))
-				System.out.println(line);
-				if(line.equals(""))
-					break;
-			}
-			
-			File file = new File(fileName);
-			
-			String responseFileName = file.exists() ? fileName : fileNameError404;
-			String response = file.exists() ? response200 : response404;
-			
-			String header = response + newLine + newLine;
-			byte [] headerBuffer = header.getBytes();
-			
-			OutputStream outputStream = socket.getOutputStream();
-			outputStream.write(headerBuffer);
-			
-			final int bufferSize = 2048;
-			byte [] buffer= new byte [bufferSize];
-			
-			FileInputStream fileInputStream = new FileInputStream(responseFileName);
+	private Socket socket;
+	private InputStream inputStream;
+	private OutputStream outputStream;
+	private String fileName;
 	
-			int count;
-	
-			while ( (count = fileInputStream.read(buffer)) != -1 )
-				outputStream.write(buffer, 0, count);
-	
-			
-			PrintWriter printWriter = new PrintWriter(socket.getOutputStream(),true);
-			printWriter.println(response + newLine);
-			printWriter.println(newLine);
-			
-			printWriter.close();
-			serverSocket.close();
-			
-			socket.close();
-		}
+	public ThreadServer(Socket socket){
+		//this. --> se refiere a un campo del objeto
+		this.socket/*este socket es el campo*/ = socket;/*este socket es el parametro*/
 	}
+
+	@Override//override es una notacion,indica que un metodo sobrescribe a otro
+	public void run() {
+		
+		//el metodo run no tiene parametros y por tanto si
+		//necesitamos pasarle informacion tendremos que pasarselo
+		//previamente o bien por un constructor o etc..
+		
+		System.out.println(Thread.currentThread().getName()+"Inicio");
+		
+		//for (int i=0;i<3;i++){
+			//System.out.println(Thread.currentThread().getName() + "paso" + i);
+			try{
+			//	Thread.sleep(1000);
+				inputStream=socket.getInputStream();
+				outputStream=socket.getOutputStream();
+			    getFileName();
+				writeHeader();
+				writeFile();
+				socket.close();
+				
+			}catch(InterruptedException ex){
+			}
+			catch(IOException ex){	
+			}
+			System.out.println(Thread.currentThread().getName()+"fin");
+		}
+
+
+
+
+
+
+	private  String getFileName(){
 	
-	public static void main(String [] args) throws IOException{
+		Scanner scanner = new Scanner(inputStream);
+	
+		String fileName = "";
+	
+		while (true){
+			String line = scanner.nextLine();
+			System.out.println(line);
+			if (line.startsWith("GET")) { //GET /index.html HTTP/1.1
+			fileName = line.substring (5, line.indexOf(" ", 5)); //-> index.html
 		
-		multiHilo();
+			}
+			if (line.equals(""))
+				break;
 		
+		}
+		
+		if (fileName.equals(""))
+			fileName = defaultFileName;
+	
+			System.out.println("fileName=" + fileName);
+	
+			return fileName;
+		}
+
+		private  void writeHeader() throws IOException {
+
+			File file = new File(fileName);
+			String response = file.exists() ? response200 : response404;
+			String header = response + newLine + newLine;
+			byte[] headerBuffer = header.getBytes();
+			outputStream.write(headerBuffer);
+
+		}
+
+		private  void writeFile() throws IOException, InterruptedException {
+
+		
+
+			File file = new File(fileName);
+
+			String responseFileName = file.exists() ? fileName : fileNameError404;
+
+			final int bufferSize = 2048;
+
+			byte [] buffer = new byte [bufferSize];
+
+			FileInputStream fileInputStream = new FileInputStream(responseFileName);
+
+			int count;
+			//pausa
+			while ((count = fileInputStream.read(buffer)) != -1){
+				System.out.println(Thread.currentThread().getName() + ".");
+				Thread.sleep(100);
+				outputStream.write(buffer, 0, count);
+
+			}
+			fileInputStream.close();
+
+
 	}
 }

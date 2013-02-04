@@ -19,12 +19,23 @@ public class HttpServer {
 	public static void main(String [] args) throws IOException, InterruptedException{
 		final int port = 8080;
 		ServerSocket serverSocket = new ServerSocket(port);
-		while(true)
-		{
-			Socket socket = serverSocket.accept();
-			SimpleServer.Process(socket);
-		}
 		
+			
+			//for (int i= 0;i <  4;i++){
+			
+			//}
+		
+			while(true)
+			{
+				Socket socket = serverSocket.accept();
+				Runnable runnable = new ThreadServer(socket);
+				Thread thread = new Thread(runnable);
+				thread.start();
+				thread.sleep(1000);
+				//SimpleServer.Process(socket);
+			}
+			
+			//serverSocket.close();
 	}
 	
 
